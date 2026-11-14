@@ -1,0 +1,38 @@
+# Dueños por área. La última regla que coincide gana.
+# TODO: reemplazar @usuario-rafael y @usuario-saray por los usuarios reales de GitHub.
+*                                    @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+
+# Juan Camilo: producto (lógica, API, pruebas unitarias, frontend)
+/backend/app/                        @Juan-Camilo-Martinez-B
+/backend/tests/unit/                 @Juan-Camilo-Martinez-B
+/backend/tests/conftest.py           @Juan-Camilo-Martinez-B
+/backend/Dockerfile                  @Juan-Camilo-Martinez-B
+/backend/.dockerignore               @Juan-Camilo-Martinez-B
+/frontend/                           @Juan-Camilo-Martinez-B
+/docs/backend-frontend.md            @Juan-Camilo-Martinez-B
+
+# Rafael: calidad (contrato, CI, SonarCloud, carga)
+/tests_api/                          @usuario-rafael
+/carga/                              @usuario-rafael
+/sonar-project.properties            @usuario-rafael
+/.github/workflows/ci.yml            @usuario-rafael
+/.github/workflows/carga.yml         @usuario-rafael
+/docs/calidad.md                     @usuario-rafael
+
+# Saray: plataforma (IaC, S3/SQS, CD, Telegram)
+/infra/                              @usuario-saray
+/deploy/                             @usuario-saray
+/backend/app/storage/s3_sqs.py       @usuario-saray
+/backend/tests/integracion/          @usuario-saray
+/.github/workflows/cd.yml            @usuario-saray
+/docs/infra-cd.md                    @usuario-saray
+
+# Archivos BASE congelados: cualquier cambio necesita a los tres
+/docker-compose.yml                  @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/requirements.txt            @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/pytest.ini                  @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/.coveragerc                 @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/app/config.py               @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/app/storage/__init__.py     @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/backend/app/storage/base.py         @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray
+/.github/CODEOWNERS                  @Juan-Camilo-Martinez-B @usuario-rafael @usuario-saray

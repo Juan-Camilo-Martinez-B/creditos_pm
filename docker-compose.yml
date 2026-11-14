@@ -1,0 +1,79 @@
+# [BASE] Orquestación completa de CrediCheck. Congelado: cambios solo por rama chore/ aprobada por los tres.
+name: credicheck
+
+services:
+  localstack:
+    image: localstack/localstack:3.8.1
+    container_name: credicheck-localstack
+    ports: ["4566:4566"]
+    environment:
+      - SERVICES=s3,sqs
+      - AWS_DEFAULT_REGION=us-east-1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  infra-init: # IaC: crea bucket y colas (idempotente)
+    image: python:3.11-slim
+    container_name: credicheck-infra-init
+    depends_on:
+      localstack: { condition: service_healthy }
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    volumes: ["./infra:/infra:ro"]
+    command: sh -c "pip install -q boto3==1.35.36 && python /infra/init_infra.py"
+
+  api:
+    build: ./backend
+    image: credicheck-api:dev
+    container_name: credicheck-api
+    ports: ["8000:8000"]
+    environment:
+      - APP_ENV=desarrollo
+      - STORAGE_BACKEND=s3
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    depends_on:
+      infra-init: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request as u; u.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build: ./frontend
+    container_name: credicheck-frontend
+    ports: ["8081:80"]
+    depends_on:
+      api: { condition: service_healthy }
+
+  test-runner: # contrato de la API (efímero)
+    build: ./tests_api
+    container_name: credicheck-test-runner
+    profiles: ["pruebas"]
+    environment: ["API_URL=http://api:8000"]
+    depends_on:
+      api: { condition: service_healthy }
+
+  locust: # pruebas de carga
+    image: locustio/locust:2.31.8
+    container_name: credicheck-locust
+    profiles: ["carga"]
+    ports: ["8089:8089"]
+    volumes: ["./carga:/mnt/locust:ro"]
+    command: -f /mnt/locust/locustfile.py --host http://api:8000
+    depends_on:
+      api: { condition: service_healthy }
+
+networks:
+  default:
+    name: credicheck_red

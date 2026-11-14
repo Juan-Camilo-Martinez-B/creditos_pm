@@ -1,0 +1,23 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Cobertura
+.coverage
+coverage.xml
+htmlcov/
+
+# Secretos locales (los valores reales van en GitHub Secrets)
+.env
+
+# Resultados de Locust
+carga/resultados/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

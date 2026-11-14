@@ -1,0 +1,32 @@
+# [RA] CI de CrediCheck — Esqueleto de la Fase 0.
+# Rafael lo completa en RA-3: fijar acciones por SHA, agregar SonarCloud y pruebas de integración.
+name: CI CrediCheck
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  pruebas-unitarias:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4 # TODO RA-3: fijar por SHA completo
+      - uses: actions/setup-python@v5 # TODO RA-3: fijar por SHA completo
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest # Quality Gate de cobertura (>= 80 %)
+
+  pruebas-contrato:
+    needs: pruebas-unitarias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # TODO RA-3: fijar por SHA completo
+      - run: docker compose --profile pruebas run --rm --build test-runner
+      - if: always()
+        run: docker compose --profile pruebas down -v

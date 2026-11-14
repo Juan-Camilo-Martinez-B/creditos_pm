@@ -1,0 +1,5 @@
+[run]
+branch = True
+omit =
+    # Adaptador de infraestructura: se valida en las pruebas de integración (LocalStack)
+    app/storage/s3_sqs.py

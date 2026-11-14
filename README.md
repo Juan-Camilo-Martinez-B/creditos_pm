@@ -11,9 +11,9 @@ publica un evento en SQS (emulados con LocalStack).
 
 | Integrante | Rama | Responsabilidad | Documentación |
 |---|---|---|---|
-| Juan Camilo | `feature/backend-frontend` | Reglas de negocio, API, pruebas unitarias, frontend | [docs/backend-frontend.md](docs/backend-frontend.md) |
+| Juan Camilo | `feature/backend-frontend` | Reglas de negocio, API, pruebas unitarias, frontend, notificaciones de Telegram | [docs/backend-frontend.md](docs/backend-frontend.md) |
 | Rafael | `feature/calidad-ci` | Pruebas de contrato, CI, SonarCloud, Locust | [docs/calidad.md](docs/calidad.md) |
-| Saray | `feature/infra-cd` | LocalStack (IaC), S3/SQS, CD con rollback, Telegram | [docs/infra-cd.md](docs/infra-cd.md) |
+| Saray | `feature/infra-cd` | LocalStack (IaC), S3/SQS, CD con rollback | [docs/infra-cd.md](docs/infra-cd.md) |
 
 **Regla de oro:** cada archivo tiene un único dueño (ver [.github/CODEOWNERS](.github/CODEOWNERS)).
 Los archivos compartidos (`docker-compose.yml`, `backend/requirements.txt`, `backend/pytest.ini`,

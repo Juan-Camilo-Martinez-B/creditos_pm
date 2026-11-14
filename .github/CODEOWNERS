@@ -22,6 +22,8 @@
 # Saray: plataforma (IaC, S3/SQS, CD, Telegram)
 /infra/                              @usuario-saray
 /deploy/                             @usuario-saray
+/deploy/notificador.py               @Juan-Camilo-Martinez-B
+/deploy/test_notificador.py          @Juan-Camilo-Martinez-B
 /backend/app/storage/s3_sqs.py       @usuario-saray
 /backend/tests/integracion/          @usuario-saray
 /.github/workflows/cd.yml            @usuario-saray

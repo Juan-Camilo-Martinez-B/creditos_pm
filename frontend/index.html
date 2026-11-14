@@ -4,18 +4,121 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CrediCheck</title>
+  <meta name="description" content="Evaluación automática de solicitudes de crédito, probada en cada cambio.">
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-  <!-- [JC] Esqueleto de la Fase 0: el frontend completo se construye en JC-9 -->
-  <header>
-    <h1>CrediCheck</h1>
-    <p>Decisiones de crédito confiables, probadas en cada cambio.</p>
-    <span id="estado" class="estado">Consultando estado…</span>
+  <header class="encabezado">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">✓</span>
+      <div>
+        <h1>CrediCheck</h1>
+        <p class="lema">Decisiones de crédito confiables, probadas en cada cambio.</p>
+      </div>
+    </div>
+    <div id="estado" class="estado" role="status" aria-live="polite">
+      <span class="punto" aria-hidden="true"></span>
+      <span id="estado-texto">Consultando estado…</span>
+    </div>
   </header>
-  <main>
-    <p>Frontend en construcción.</p>
+
+  <main class="contenedor">
+    <section class="grilla">
+      <!-- Formulario de solicitud -->
+      <article class="tarjeta">
+        <h2>Nueva solicitud</h2>
+        <form id="formulario" novalidate>
+          <label for="solicitante">Solicitante</label>
+          <input id="solicitante" name="solicitante" type="text" minlength="3" maxlength="80"
+                 placeholder="Nombre completo" required autocomplete="off">
+
+          <label for="score">Score de crédito</label>
+          <div class="fila-score">
+            <input id="score-rango" type="range" min="300" max="850" step="1" value="700" aria-label="Score (deslizador)">
+            <input id="score" name="score" type="number" min="300" max="850" step="1" value="700" required>
+          </div>
+          <p id="banda-actual" class="ayuda"></p>
+
+          <label for="ingresos">Ingresos mensuales (USD)</label>
+          <input id="ingresos" name="ingresos" type="number" min="0" step="0.01" value="2500" required>
+
+          <label for="monto">Monto solicitado (USD)</label>
+          <input id="monto" name="monto_solicitado" type="number" min="500" max="100000" step="0.01" value="1000" required>
+
+          <button id="boton-evaluar" type="submit" class="boton-primario">Evaluar solicitud</button>
+        </form>
+
+        <div class="casos">
+          <p class="ayuda">Casos frontera para la demo (valores límite):</p>
+          <div id="casos-frontera" class="chips"></div>
+        </div>
+      </article>
+
+      <!-- Resultado -->
+      <article class="tarjeta" aria-live="polite">
+        <h2>Resultado</h2>
+        <div id="resultado" class="resultado vacio">
+          <p>Complete el formulario y presione <strong>Evaluar solicitud</strong>.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Reglas -->
+    <section class="tarjeta">
+      <h2>Reglas y fronteras</h2>
+      <p class="ayuda">Los umbrales vienen de la API (<code>GET /api/v1/reglas</code>). Las fronteras entre bandas son
+        los valores que más se prueban: un <code>&gt;</code> en lugar de <code>&gt;=</code> cambia la decisión.</p>
+      <div id="barra-bandas" class="barra-bandas" aria-hidden="true"></div>
+      <div class="tabla-envoltura">
+        <table>
+          <thead><tr><th>Banda de score</th><th>Decisión</th><th>Monto máximo</th></tr></thead>
+          <tbody id="tabla-reglas"><tr><td colspan="3">Cargando reglas…</td></tr></tbody>
+        </table>
+      </div>
+      <p id="resumen-reglas" class="ayuda"></p>
+    </section>
+
+    <!-- Historial -->
+    <section class="tarjeta">
+      <div class="titulo-con-acciones">
+        <h2>Historial</h2>
+        <div class="acciones">
+          <label for="filtro" class="oculto">Filtrar por decisión</label>
+          <select id="filtro">
+            <option value="">Todas las decisiones</option>
+            <option value="APROBADO">Aprobado</option>
+            <option value="APROBADO_PARCIAL">Aprobado parcial</option>
+            <option value="RECHAZADO">Rechazado</option>
+          </select>
+          <button id="boton-actualizar" type="button" class="boton-secundario">Actualizar</button>
+        </div>
+      </div>
+      <p id="tiempo-historial" class="ayuda"></p>
+      <div class="tabla-envoltura">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Solicitante</th><th>Score</th><th>Decisión</th><th>Monto aprobado</th></tr>
+          </thead>
+          <tbody id="tabla-historial"><tr><td colspan="5">Sin evaluaciones todavía.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
   </main>
+
+  <footer class="pie">
+    <p><strong>Cómo se prueba CrediCheck</strong></p>
+    <ol class="capas">
+      <li>Pruebas unitarias</li>
+      <li>Contrato de API</li>
+      <li>Integración continua</li>
+      <li>SonarCloud</li>
+      <li>Carga con Locust</li>
+      <li>Despliegue continuo</li>
+      <li>Infraestructura como código</li>
+    </ol>
+    <p class="ayuda">Proyecto final · Pruebas y Mantenimiento de Software · Universidad Cooperativa de Colombia</p>
+  </footer>
+
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
 </body>

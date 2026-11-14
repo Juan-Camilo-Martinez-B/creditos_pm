@@ -35,7 +35,9 @@ python -m pytest
 
 Resultado: **91 pruebas en verde, cobertura de líneas y ramas del 100 %** (Quality Gate: 80 %).
 Salida completa en [evidencias/juan-camilo/cobertura.txt](evidencias/juan-camilo/cobertura.txt).
-El reporte visual queda en `backend/htmlcov/index.html` al ejecutar las pruebas.
+El reporte visual queda en `backend/htmlcov/index.html` al ejecutar las pruebas:
+
+![Reporte de cobertura](evidencias/juan-camilo/cobertura-htmlcov.jpg)
 
 ### Cadena error → defecto → fallo (demo de la falla 1)
 
@@ -73,7 +75,8 @@ docker run --rm -p 8000:8000 credicheck-api:v1
 ```
 
 Imagen `python:3.11-slim` de 267 MB, dependencias en una capa aparte (caché), usuario sin privilegios
-(`appuser`) y sin pruebas dentro de la imagen (`.dockerignore`).
+(`appuser`) y sin pruebas dentro de la imagen (`.dockerignore`). Evidencia en
+[evidencias/juan-camilo/docker-imagen.txt](evidencias/juan-camilo/docker-imagen.txt).
 
 ## 5. Frontend (`frontend/`)
 
@@ -112,6 +115,8 @@ mensaje_evento_credito(evaluacion: dict) -> str
 
 - El token y el chat id se leen **solo** de `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` (GitHub Secrets).
 - Si faltan, imprime `[TELEGRAM DESACTIVADO]` y retorna `False`; nunca lanza excepciones ni imprime el token.
+- Bot: **@Pm_finalBot**. Secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` cargados en GitHub Actions.
+  Prueba real del 14-11-2026: 3/3 mensajes enviados (éxito, rollback y servidor inaccesible).
 - Pruebas sin red real (12 casos):
 
 ```bash

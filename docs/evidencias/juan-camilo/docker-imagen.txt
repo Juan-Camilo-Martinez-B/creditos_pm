@@ -1,0 +1,8 @@
+$ docker build -t credicheck-api:v1 ./backend
+$ docker images credicheck-api
+REPOSITORY       TAG       IMAGE ID       SIZE
+credicheck-api   v1        c0312caf18eb   267MB
+credicheck-api   dev       8800d29a84d2   267MB
+
+$ docker run --rm credicheck-api:v1 whoami
+appuser

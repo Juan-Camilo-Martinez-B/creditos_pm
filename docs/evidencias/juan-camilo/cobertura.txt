@@ -1,0 +1,19 @@
+---------- coverage: platform win32, python 3.12.10-final-0 ----------
+Name                      Stmts   Miss Branch BrPart  Cover   Missing
+---------------------------------------------------------------------
+app\__init__.py               0      0      0      0   100%
+app\config.py                14      0      0      0   100%
+app\main.py                  39      0      2      0   100%
+app\reglas_credito.py        55      0     22      0   100%
+app\schemas.py               45      0      0      0   100%
+app\storage\__init__.py      10      0      2      0   100%
+app\storage\base.py          11      0      0      0   100%
+app\storage\memoria.py       23      0      2      0   100%
+---------------------------------------------------------------------
+TOTAL                       197      0     28      0   100%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+
+Required test coverage of 80% reached. Total coverage: 100.00%
+
+====================== 91 passed, 1 deselected in 0.41s =======================

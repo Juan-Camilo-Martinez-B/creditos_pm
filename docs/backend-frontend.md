@@ -117,6 +117,9 @@ mensaje_evento_credito(evaluacion: dict) -> str
 - Si faltan, imprime `[TELEGRAM DESACTIVADO]` y retorna `False`; nunca lanza excepciones ni imprime el token.
 - Bot: **@Pm_finalBot**. Secretos `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` cargados en GitHub Actions.
   Prueba real del 14-11-2026: 3/3 mensajes enviados (éxito, rollback y servidor inaccesible).
+
+  <img src="evidencias/juan-camilo/telegram-mensajes.jpg" alt="Mensajes de Telegram" width="300">
+
 - Pruebas sin red real (12 casos):
 
 ```bash

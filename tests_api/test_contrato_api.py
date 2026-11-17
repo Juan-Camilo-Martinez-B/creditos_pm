@@ -96,3 +96,11 @@ def test_crear_evaluacion_fronteras(score, ingresos, monto, codigo, decision, mo
 def test_tipo_invalido_retorna_422(cuerpo):
     respuesta = requests.post(f"{BASE_URL}/api/v1/evaluaciones", json=cuerpo, timeout=5)
     _afirmar_niveles(respuesta, 422, ERROR_SCHEMA, 1)
+
+
+def test_consultar_evaluacion_creada():
+    """Prueba independiente: crea sus propios datos y no reutiliza otra evaluación."""
+    creada = _afirmar_niveles(_evaluar(650, 3000.0, 1000.0), 201, EVALUACION_SCHEMA, 1)
+    respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones/{creada['id']}", timeout=5)
+    obtenida = _afirmar_niveles(respuesta, 200, EVALUACION_SCHEMA, 1)
+    assert obtenida == creada

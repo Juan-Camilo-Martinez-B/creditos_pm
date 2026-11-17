@@ -5,7 +5,7 @@ porque el adaptador lista objetos y luego pide cada uno (patrón N+1).
 """
 import random
 
-from locust import HttpUser, between, task
+from locust import HttpUser, between, events, task
 
 CASOS = [
     {"score": 599, "ingresos": 2500.0, "monto_solicitado": 1000.0},
@@ -42,3 +42,12 @@ class AnalistaCredito(HttpUser):
     @task(1)
     def salud(self):
         self.client.get("/health", name="GET /health")
+
+
+@events.quitting.add_listener
+def umbral_de_rendimiento(environment, **kwargs):
+    """Quality Gate de rendimiento: más de 1 % de fallos o p95 > 800 ms rompe el escenario."""
+    total = environment.stats.total
+    p95 = total.get_response_time_percentile(0.95) or 0
+    if total.fail_ratio > 0.01 or p95 > 800:
+        environment.process_exit_code = 1

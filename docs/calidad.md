@@ -82,3 +82,33 @@ Se ejecuta en el frontend (`http://localhost:8081`) como si quien opera fuera el
 | UAT-10 | Mirar el indicador del encabezado. Apagar la API y esperar hasta 15 s. | En línea se lee versión y entorno. Al caer la API el indicador pasa a «API no disponible». |
 
 Estas diez filas se marcan en la sustentación, con la pantalla abierta, no solo con el JSON de la API.
+
+## 5. Plantilla de reporte de defecto
+
+Copiar este bloque al abrir un issue. El título nombra el síntoma, no la causa supuesta.
+
+```
+Título: [pantalla o endpoint] qué se ve
+
+Pasos para reproducir:
+1.
+2.
+3.
+
+Resultado esperado:
+Resultado obtenido:
+
+Clasificación (semana 1):
+- Error (equivocación humana):
+- Defecto (lo incorrecto en el código o la configuración):
+- Fallo (lo que ve el usuario o la prueba):
+
+Datos: score / ingresos / monto / id
+Entorno: desarrollo | staging | produccion
+Versión de la API:
+Prueba que lo detecta: (unitaria, contrato, UAT o Locust)
+Severidad: bloqueante | mayor | menor
+Dueño del archivo (CODEOWNERS):
+```
+
+Ejemplo ya resuelto en el diseño, para explicar la cadena en la sustentación: alguien entiende «score mayor a 600» y escribe `score > 600`. El defecto está en la comparación. El fallo es que una persona con score 600 sale rechazada. La fila `score_600_on_point` lo detiene antes de llegar al analista.

@@ -18,7 +18,19 @@ from esquemas import (
     SALUD_SCHEMA,
 )
 
-BASE_URL = os.getenv("API_URL", "http://localhost:8000")
+def _base_url() -> str:
+    """API_URL manda. En Docker el compose la fija en http://api:8000.
+
+    En Windows, «localhost» prueba ::1 antes que 127.0.0.1 y requests.elapsed
+    suma unos 2 s. El umbral de 500 ms mediría esa espera, no la API.
+    """
+    url = os.getenv("API_URL", "http://localhost:8000").rstrip("/")
+    if os.name == "nt" and "://localhost" in url:
+        url = url.replace("://localhost", "://127.0.0.1", 1)
+    return url
+
+
+BASE_URL = _base_url()
 
 
 def _afirmar_niveles(respuesta: requests.Response, codigo: int, schema: dict, max_segundos: float) -> dict:

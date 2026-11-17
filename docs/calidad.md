@@ -168,6 +168,8 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 # En otra terminal, desde tests_api/
 python -m pip install -r requirements.txt
 python -m pytest -v --tb=short test_contrato_api.py
+# En Windows el default localhost se reescribe a 127.0.0.1: si no, el elapsed
+# suma ~2 s de IPv6 y el umbral de 500 ms falla aunque la API esté sana.
 
 # Igual que la CI, cuando el adaptador S3 ya persista
 docker compose --profile pruebas run --rm --build test-runner

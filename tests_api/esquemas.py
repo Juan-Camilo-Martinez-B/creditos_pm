@@ -53,3 +53,43 @@ REGLAS_SCHEMA = {
         },
     },
 }
+
+EVALUACION_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "id",
+        "solicitante",
+        "score",
+        "ingresos",
+        "monto_solicitado",
+        "decision",
+        "motivo",
+        "monto_maximo",
+        "monto_aprobado",
+        "comprobante",
+        "fecha",
+        "version_api",
+    ],
+    "properties": {
+        "id": {"type": "string", "pattern": "^[0-9a-f-]{36}$"},
+        "solicitante": {"type": "string", "minLength": 3, "maxLength": 80},
+        "score": {"type": "integer", "minimum": 300, "maximum": 850},
+        "ingresos": {"type": "number", "minimum": 0},
+        "monto_solicitado": {"type": "number", "minimum": 500, "maximum": 100000},
+        "decision": {"enum": ["APROBADO", "APROBADO_PARCIAL", "RECHAZADO"]},
+        "motivo": {
+            "enum": [
+                "CUMPLE_REQUISITOS",
+                "MONTO_AJUSTADO",
+                "SCORE_INSUFICIENTE",
+                "INGRESOS_INSUFICIENTES",
+            ]
+        },
+        "monto_maximo": {"type": "number", "minimum": 0},
+        "monto_aprobado": {"type": "number", "minimum": 0},
+        "comprobante": {"type": "string", "minLength": 1},
+        "fecha": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T"},
+        "version_api": {"type": "string", "minLength": 1},
+    },
+}

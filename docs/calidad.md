@@ -63,3 +63,22 @@ Cada fila sale de la sección 4 de la propuesta. La prueba unitaria la escribe J
 | `GET /reglas` publica 600 y 2000 | `test_endpoints` | `test_reglas_cumplen_esquema_y_umbrales` | UAT-06 |
 | `GET /health` en menos de 500 ms | `test_endpoints` | `test_health_responde_200_y_cumple_esquema` | UAT-10 |
 | El POST de una evaluación válida responde en menos de 1 s | — | `test_crear_evaluacion_tiempo_respuesta` | UAT-02 |
+
+## 4. Lista de aceptación (UAT)
+
+Se ejecuta en el frontend (`http://localhost:8081`) como si quien opera fuera el analista de crédito. Validación: ¿construimos lo correcto? El nombre del solicitante puede ser cualquier texto de 3 a 80 caracteres.
+
+| Id | Pasos | Resultado esperado |
+|---|---|---|
+| UAT-01 | Pulsar el chip «Score 599» y luego «Evaluar solicitud». | La tarjeta dice «Rechazado» y explica que el score está por debajo de 600. Monto aprobado US$ 0,00. |
+| UAT-02 | Pulsar «Score 600» y evaluar. | Dice «Aprobado» y «Cumple todos los requisitos». Monto máximo US$ 7.500,00 y monto aprobado US$ 1.000,00. |
+| UAT-03 | Pulsar «Ingresos 1999.99» y evaluar. | «Rechazado» porque los ingresos son menores a US$ 2.000,00. |
+| UAT-04 | Pulsar «Ingresos 2000» y evaluar. | «Aprobado». Con score 700 el máximo es US$ 10.000,00 y se aprueba el US$ 1.000,00 pedido. |
+| UAT-05 | Pulsar «Monto 10000.01» y evaluar. | «Aprobado parcialmente». El texto dice que se aprueba hasta el monto máximo. Monto aprobado US$ 10.000,00, no los 10.000,01 pedidos. |
+| UAT-06 | Leer la tabla «Reglas y fronteras» sin evaluar nada. | Se ve la aprobación mínima en 600, los ingresos mínimos en 2.000 y las bandas ×3, ×5 y ×8. Esos números vienen de `GET /api/v1/reglas`. |
+| UAT-07 | Pulsar «Score 851 (inválido)» y evaluar. | «No se pudo evaluar» y el mensaje de score fuera de rango (300-850). No aparece una fila nueva de decisión Aprobado. |
+| UAT-08 | Borrar el score y pulsar evaluar; después escribir un solicitante de dos letras. | El formulario no envía la solicitud (campos requeridos y longitud mínima). No hay decisión a medias. |
+| UAT-09 | Evaluar UAT-01 y enseguida UAT-02. Pulsar «Actualizar» en Historial. | La fila de score 600 queda por encima de la de score 599. El filtro «Aprobado» deja solo la segunda. |
+| UAT-10 | Mirar el indicador del encabezado. Apagar la API y esperar hasta 15 s. | En línea se lee versión y entorno. Al caer la API el indicador pasa a «API no disponible». |
+
+Estas diez filas se marcan en la sustentación, con la pantalla abierta, no solo con el JSON de la API.

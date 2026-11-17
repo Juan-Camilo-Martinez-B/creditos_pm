@@ -45,3 +45,21 @@ Entra todo lo que el contrato de la sección 7 promete al analista: salud del se
 - El Quality Gate de SonarCloud queda en Passed sobre el código nuevo.
 - El informe de Locust identifica el cuello de botella y, después de la optimización de Saray, compara mediana, p95 y RPS del historial.
 - La lista UAT está ejecutada sobre el frontend, con el resultado anotado.
+
+## 3. Matriz de trazabilidad
+
+Cada fila sale de la sección 4 de la propuesta. La prueba unitaria la escribe Juan Camilo; el contrato y el caso UAT son de esta rama.
+
+| Regla | Unitaria (JC) | Contrato (RA) | UAT |
+|---|---|---|---|
+| Score 599 rechaza; 600 aprueba | `test_evaluar_prestamo_fronteras` | `score_599_off_point`, `score_600_on_point` | UAT-01, UAT-02 |
+| Score 851 está fuera de dominio (400) | `test_validaciones` | `score_851_fuera_de_rango` | UAT-07 |
+| Ingresos 1999.99 rechazan; 2000 aprueban | frontera de ingresos | `ingresos_1999_99`, `ingresos_2000` | UAT-03, UAT-04 |
+| Monto 10000.01 con score 700 ajusta a 10000 | frontera de monto | `monto_10000_01` | UAT-05 |
+| Score texto, null o ausente → 422 | `test_endpoints` | `test_tipo_invalido_retorna_422` | UAT-08 |
+| La evaluación creada se puede volver a leer | `test_endpoints` | `test_consultar_evaluacion_creada` | UAT-09 |
+| Un id desconocido responde 404 | `test_endpoints` | `test_evaluacion_inexistente_retorna_404` | — |
+| El historial va de la más reciente a la más antigua y `limite` está entre 1 y 100 | `test_endpoints` | `test_historial_cumple_esquema_y_orden`, `test_historial_limite_invalido_retorna_422` | UAT-09 |
+| `GET /reglas` publica 600 y 2000 | `test_endpoints` | `test_reglas_cumplen_esquema_y_umbrales` | UAT-06 |
+| `GET /health` en menos de 500 ms | `test_endpoints` | `test_health_responde_200_y_cumple_esquema` | UAT-10 |
+| El POST de una evaluación válida responde en menos de 1 s | — | `test_crear_evaluacion_tiempo_respuesta` | UAT-02 |

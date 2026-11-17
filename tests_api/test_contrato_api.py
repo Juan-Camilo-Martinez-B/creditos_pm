@@ -135,3 +135,8 @@ def test_historial_cumple_esquema_y_orden():
 def test_historial_limite_invalido_retorna_422(limite):
     respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones", params={"limite": limite}, timeout=5)
     _afirmar_niveles(respuesta, 422, ERROR_SCHEMA, 1)
+
+
+def test_crear_evaluacion_tiempo_respuesta():
+    respuesta = _evaluar(700, 2500.0, 1000.0)
+    _afirmar_niveles(respuesta, 201, EVALUACION_SCHEMA, 1)

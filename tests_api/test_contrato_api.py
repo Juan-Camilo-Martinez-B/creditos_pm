@@ -10,7 +10,13 @@ import pytest
 import requests
 from jsonschema import validate
 
-from esquemas import ERROR_SCHEMA, EVALUACION_SCHEMA, REGLAS_SCHEMA, SALUD_SCHEMA
+from esquemas import (
+    ERROR_SCHEMA,
+    EVALUACION_SCHEMA,
+    LISTA_EVALUACIONES_SCHEMA,
+    REGLAS_SCHEMA,
+    SALUD_SCHEMA,
+)
 
 BASE_URL = os.getenv("API_URL", "http://localhost:8000")
 
@@ -111,3 +117,15 @@ def test_evaluacion_inexistente_retorna_404():
     respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones/{uuid4()}", timeout=5)
     cuerpo = _afirmar_niveles(respuesta, 404, ERROR_SCHEMA, 1)
     assert cuerpo["detail"] == "Evaluación no encontrada"
+
+
+def test_historial_cumple_esquema_y_orden():
+    primera = _afirmar_niveles(_evaluar(600, 2500.0, 1000.0), 201, EVALUACION_SCHEMA, 1)
+    segunda = _afirmar_niveles(_evaluar(800, 2500.0, 1000.0), 201, EVALUACION_SCHEMA, 1)
+    respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones", params={"limite": 100}, timeout=5)
+    lista = _afirmar_niveles(respuesta, 200, LISTA_EVALUACIONES_SCHEMA, 1)
+    assert len(lista) <= 100
+    fechas = [item["fecha"] for item in lista]
+    assert fechas == sorted(fechas, reverse=True)
+    posiciones = {item["id"]: indice for indice, item in enumerate(lista)}
+    assert posiciones[segunda["id"]] < posiciones[primera["id"]]

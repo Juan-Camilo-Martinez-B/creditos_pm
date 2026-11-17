@@ -93,3 +93,21 @@ EVALUACION_SCHEMA = {
         "version_api": {"type": "string", "minLength": 1},
     },
 }
+
+LISTA_EVALUACIONES_SCHEMA = {
+    "type": "array",
+    "items": EVALUACION_SCHEMA,
+}
+
+ERROR_SCHEMA = {
+    "type": "object",
+    "required": ["detail"],
+    "properties": {
+        "detail": {
+            "anyOf": [
+                {"type": "string", "minLength": 1},
+                {"type": "array", "minItems": 1},
+            ]
+        }
+    },
+}

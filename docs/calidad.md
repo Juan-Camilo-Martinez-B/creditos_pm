@@ -112,3 +112,66 @@ Dueño del archivo (CODEOWNERS):
 ```
 
 Ejemplo ya resuelto en el diseño, para explicar la cadena en la sustentación: alguien entiende «score mayor a 600» y escribe `score > 600`. El defecto está en la comparación. El fallo es que una persona con score 600 sale rechazada. La fila `score_600_on_point` lo detiene antes de llegar al analista.
+
+## 6. Carga con Locust
+
+Tres escenarios. El de humo y el de carga buscan 0 % de fallos y p95 del POST por debajo de 800 ms (OE6). El de estrés busca el punto de quiebre.
+
+| Escenario | Usuarios | Spawn | Duración | Comando |
+|---|---|---|---|---|
+| Humo | 10 | 2/s | 1 min | `locust -f carga/locustfile.py --host http://localhost:8000 --headless -u 10 -r 2 -t 1m` |
+| Carga | 100 | 10/s | 5 min | `-u 100 -r 10 -t 5m` |
+| Estrés | 500 y subir hacia 2000 | 50/s | hasta que el p95 o los fallos se disparen | `-u 500 -r 50 -t 3m`, luego repetir con más usuarios |
+
+En GitHub: Actions → «Pruebas de carga» → Run workflow. El resultado queda en el artefacto `reporte-carga` (`carga/resultados/reporte.html` y los CSV). El job usa el mismo umbral que el listener `umbral_de_rendimiento`: si los fallos superan 1 % o el p95 global supera 800 ms, Locust termina con código 1.
+
+### Cuello de botella (hipótesis para Saray)
+
+`GET /api/v1/evaluaciones` será el más lento cuando el almacenamiento sea S3. `listar()` hace un `list_objects` y después una lectura por cada objeto (N+1). En memoria ese listado es un ordenamiento local, así que no sirve para declarar el cuello de botella: hay que medirlo con `STORAGE_BACKEND=s3` y el adaptador real. La comparación antes/después (mediana, p95 y RPS solo del historial) se llena cuando Saray entregue el índice `indices/recientes.json`.
+
+| Métrica del historial | Antes (N+1) | Después (índice) |
+|---|---|---|
+| Mediana | pendiente de la medición sobre S3 | pendiente |
+| p95 | pendiente | pendiente |
+| RPS | pendiente | pendiente |
+
+## 7. SonarCloud
+
+1. Entrar a sonarcloud.io con GitHub e importar `Juan-Camilo-Martinez-B/creditos_pm`.
+2. Desactivar Automatic Analysis. Si queda activo, choca con el análisis del CI.
+3. Copiar la organización y el project key reales a `sonar-project.properties` si difieren de `juan-camilo-martinez-b` y `juan-camilo-martinez-b_creditos_pm`.
+4. Crear el secreto `SONAR_TOKEN` en el repositorio (Settings → Secrets → Actions). No se escribe en el código ni en `.env` versionado.
+5. `sonar.qualitygate.wait=true` hace fallar el job `analisis-sonarcloud` si el gate no pasa, y ese job es un status check obligatorio.
+
+Gate «Sonar way» sobre código nuevo: cobertura ≥ 80 %, duplicación ≤ 3 %, fiabilidad, seguridad y mantenibilidad en A, y 100 % de hotspots revisados. Los hallazgos se abren como issues asignados al dueño del archivo (CODEOWNERS); cada quien los corrige en su rama.
+
+## 8. Protección de `main` (RA-4)
+
+Lo hace un administrador del repositorio (Juan Camilo), en Settings → Branches → regla de `main`:
+
+- Exigir Pull Request antes de mergear.
+- Una aprobación.
+- Revisión de CODEOWNERS.
+- Status checks obligatorios: `pruebas-unitarias`, `analisis-sonarcloud`, `pruebas-integracion`, `pruebas-contrato`.
+- Prohibir force push.
+
+Evidencia para la sustentación: un PR con el botón de merge bloqueado mientras uno de esos checks está en rojo. Los PR se cierran con «Create a merge commit» y la rama no se borra. El orden del hito es Juan Camilo, luego Saray, luego esta rama.
+
+## 9. Cómo ejecutar la parte de Rafael
+
+```bash
+# Contrato contra la API en memoria (no toca archivos de otros)
+cd backend
+set STORAGE_BACKEND=memoria
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+# En otra terminal, desde tests_api/
+python -m pip install -r requirements.txt
+python -m pytest -v --tb=short test_contrato_api.py
+
+# Igual que la CI, cuando el adaptador S3 ya persista
+docker compose --profile pruebas run --rm --build test-runner
+
+# Carga con interfaz en http://localhost:8089
+docker compose --profile carga up -d --build
+```

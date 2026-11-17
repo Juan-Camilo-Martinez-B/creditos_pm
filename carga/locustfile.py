@@ -14,3 +14,31 @@ CASOS = [
     {"score": 700, "ingresos": 2000.0, "monto_solicitado": 10000.01},
     {"score": 850, "ingresos": 5000.0, "monto_solicitado": 30000.0},
 ]
+
+
+class AnalistaCredito(HttpUser):
+    wait_time = between(1, 3)
+
+    @task(5)
+    def evaluar_solicitud(self):
+        cuerpo = {"solicitante": "Usuario de carga", **random.choice(CASOS)}
+        with self.client.post(
+            "/api/v1/evaluaciones",
+            json=cuerpo,
+            name="POST /evaluaciones",
+            catch_response=True,
+        ) as respuesta:
+            if respuesta.status_code != 201:
+                respuesta.failure(f"Se esperaba 201 y llegó {respuesta.status_code}")
+
+    @task(2)
+    def consultar_reglas(self):
+        self.client.get("/api/v1/reglas", name="GET /reglas")
+
+    @task(1)
+    def consultar_historial(self):
+        self.client.get("/api/v1/evaluaciones?limite=20", name="GET /evaluaciones (historial)")
+
+    @task(1)
+    def salud(self):
+        self.client.get("/health", name="GET /health")

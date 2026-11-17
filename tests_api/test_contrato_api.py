@@ -82,3 +82,17 @@ def test_crear_evaluacion_fronteras(score, ingresos, monto, codigo, decision, mo
     assert cuerpo["motivo"] == motivo
     assert cuerpo["monto_maximo"] == pytest.approx(monto_maximo)
     assert cuerpo["monto_aprobado"] == pytest.approx(monto_aprobado)
+
+
+@pytest.mark.parametrize(
+    "cuerpo",
+    [
+        {"solicitante": SOLICITANTE, "score": "700", "ingresos": 2500.0, "monto_solicitado": 1000.0},
+        {"solicitante": SOLICITANTE, "score": None, "ingresos": 2500.0, "monto_solicitado": 1000.0},
+        {"solicitante": SOLICITANTE, "ingresos": 2500.0, "monto_solicitado": 1000.0},
+    ],
+    ids=["score_texto", "score_null", "score_faltante"],
+)
+def test_tipo_invalido_retorna_422(cuerpo):
+    respuesta = requests.post(f"{BASE_URL}/api/v1/evaluaciones", json=cuerpo, timeout=5)
+    _afirmar_niveles(respuesta, 422, ERROR_SCHEMA, 1)

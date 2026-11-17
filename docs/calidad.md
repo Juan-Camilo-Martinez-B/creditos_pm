@@ -29,3 +29,19 @@ Entra todo lo que el contrato de la sección 7 promete al analista: salud del se
 | GitHub Actions | SHA fijo, no tags flotantes | CI y carga |
 | SonarCloud | Quality Gate «Sonar way» | Cobertura, duplicación y calificaciones del código nuevo |
 | Locust | 2.31.8 | Humo, carga y estrés |
+
+## 2. Criterios de entrada y de salida
+
+### Entrada
+
+- El contrato de la sección 7 no cambió (mismos campos, mismos códigos 200, 201, 400, 404 y 422).
+- `python -m pytest` en `backend/` está en verde con cobertura de al menos 80 %.
+- Para el contrato dentro de Docker, el servicio `api` responde `GET /health`. Hoy `docker-compose.yml` fija `STORAGE_BACKEND=s3` y el adaptador de Saray todavía lanza `NotImplementedError`, así que el POST solo puede persistir cuando ese adaptador exista. Mientras tanto el contrato se ejecuta en local con `STORAGE_BACKEND=memoria`.
+
+### Salida
+
+- `docker compose --profile pruebas run --rm --build test-runner` devuelve 0 y hay al menos 12 pruebas de contrato.
+- Los cuatro jobs de `.github/workflows/ci.yml` están en verde: `pruebas-unitarias`, `analisis-sonarcloud`, `pruebas-integracion` y `pruebas-contrato`.
+- El Quality Gate de SonarCloud queda en Passed sobre el código nuevo.
+- El informe de Locust identifica el cuello de botella y, después de la optimización de Saray, compara mediana, p95 y RPS del historial.
+- La lista UAT está ejecutada sobre el frontend, con el resultado anotado.

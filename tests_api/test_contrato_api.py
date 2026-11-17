@@ -129,3 +129,9 @@ def test_historial_cumple_esquema_y_orden():
     assert fechas == sorted(fechas, reverse=True)
     posiciones = {item["id"]: indice for indice, item in enumerate(lista)}
     assert posiciones[segunda["id"]] < posiciones[primera["id"]]
+
+
+@pytest.mark.parametrize("limite", [0, 101], ids=["limite_0", "limite_101"])
+def test_historial_limite_invalido_retorna_422(limite):
+    respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones", params={"limite": limite}, timeout=5)
+    _afirmar_niveles(respuesta, 422, ERROR_SCHEMA, 1)

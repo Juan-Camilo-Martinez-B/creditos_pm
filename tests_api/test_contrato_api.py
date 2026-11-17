@@ -4,6 +4,7 @@ Cada prueba cubre los cuatro niveles de la semana 5:
 petición, código de estado, cabeceras/tiempo y esquema JSON.
 """
 import os
+from uuid import uuid4
 
 import pytest
 import requests
@@ -104,3 +105,9 @@ def test_consultar_evaluacion_creada():
     respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones/{creada['id']}", timeout=5)
     obtenida = _afirmar_niveles(respuesta, 200, EVALUACION_SCHEMA, 1)
     assert obtenida == creada
+
+
+def test_evaluacion_inexistente_retorna_404():
+    respuesta = requests.get(f"{BASE_URL}/api/v1/evaluaciones/{uuid4()}", timeout=5)
+    cuerpo = _afirmar_niveles(respuesta, 404, ERROR_SCHEMA, 1)
+    assert cuerpo["detail"] == "Evaluación no encontrada"

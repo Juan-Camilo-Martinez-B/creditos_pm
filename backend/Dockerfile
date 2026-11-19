@@ -7,4 +7,6 @@ COPY app ./app
 RUN useradd --create-home appuser
 USER appuser
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# DEMO SEMANA 9: un cambio "inocente" de puerto. Las pruebas unitarias pasan (no usan Docker),
+# pero el contenedor ya no escucha en 8000: el CD lo detecta en staging y hace rollback. NO FUSIONAR.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

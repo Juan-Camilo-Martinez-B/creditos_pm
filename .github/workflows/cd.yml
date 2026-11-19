@@ -1,0 +1,84 @@
+# [SA] CD de CrediCheck (tareas SA-5, SA-6 y SA-10).
+# Se dispara solo cuando la CI termina en verde sobre main (o a mano para la demo del rollback).
+# Staging -> smoke tests -> producción -> verificación; ante cualquier fallo, rollback + Telegram.
+name: CD CrediCheck
+
+on:
+  workflow_run:
+    workflows: ["CI CrediCheck"]
+    types: [completed]
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      forzar_fallo:
+        description: "Simular HTTP 500 en staging (demo del rollback)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: cd-produccion # nunca dos despliegues a la vez
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  desplegar:
+    # Con workflow_run solo se despliega si la CI pasó (Quality Gate).
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # Con workflow_run se despliega exactamente el commit que pasó la CI.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2 # para reconstruir la versión estable anterior (HEAD~1)
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r deploy/requirements.txt
+
+      - name: Pruebas del pipeline (sin red)
+        run: python -m pytest deploy/ -p no:cacheprovider
+
+      - name: Versión estable previa en producción
+        # Cada runner es efímero: se reconstruye la versión anterior para tener a qué volver.
+        run: |
+          PREVIA=$(git rev-parse --short HEAD~1 2>/dev/null || true)
+          if [ -n "$PREVIA" ]; then
+            git worktree add /tmp/previa "$PREVIA"
+            docker compose up -d --wait localstack
+            docker compose run --rm infra-init
+            docker build -t "credicheck-api:$PREVIA" /tmp/previa/backend
+            docker run -d --name credicheck-produccion --network credicheck_red -p 8002:8000 \
+              -e APP_ENV=produccion -e APP_VERSION="$PREVIA" -e STORAGE_BACKEND=s3 \
+              -e AWS_ENDPOINT_URL=http://localstack:4566 -e AWS_DEFAULT_REGION=us-east-1 \
+              -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test "credicheck-api:$PREVIA"
+          fi
+
+      - name: Desplegar (staging -> smoke -> producción)
+        run: |
+          ARGS="--version ${SHA::7}"
+          if [ "${{ inputs.forzar_fallo }}" = "true" ]; then ARGS="$ARGS --forzar-fallo"; fi
+          python deploy/deploy.py $ARGS
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Evidencias del despliegue
+        if: always()
+        run: |
+          mkdir -p deploy/logs
+          docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}' | tee deploy/logs/contenedores.txt
+          curl -s http://localhost:8002/health | tee deploy/logs/produccion-health.json || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: evidencias-cd
+          path: deploy/logs/
+
+      - if: always()
+        run: docker compose down -v
